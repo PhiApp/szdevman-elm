@@ -2,3 +2,21 @@
 elm-stuff
 # elm-repl generated files
 repl-temp-*
+
+node_modules
+
+logs
+*.log
+.idea
+npm-debug.log*
+build/Release
+.npm
+yarn.lock
+.node_repl_histroy
+.DS_Store
+example/dist
+
+ignore
+dist
+test/VerifyExamples
+package-lock.json
