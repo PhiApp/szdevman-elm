@@ -21,3 +21,4 @@ test/VerifyExamples
 package-lock.json
 
 build/*
+!build/.gitkeep
