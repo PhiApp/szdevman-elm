@@ -107,8 +107,11 @@ add1 model =
 view: Model -> Html Msg
 view model =
     div [] 
-    [
-        div [ class "pure-menu pure-menu-horizontal" ]
+    [     div [] [ a [href "/affe"] [text "affe"] ]
+        , div [] [ a [href "/user"] [text "user"] ]
+        , div [] [ a [href "/"] [text "/"] ]
+
+        , div [ class "pure-menu pure-menu-horizontal" ]
             [ a 
                 [ class "pure-menu-heading pure-menu-link"
                 , href "#"

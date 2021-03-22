@@ -105,13 +105,19 @@ update message model =
         (UrlChanged url, _) ->
             case toRoute url of 
                 UserIndexRoute ->
-                    Pages.UserIndex.init () url (toNavKey model)|> updateWith UserIndexModel UserIndexMsg model
+                    Debug.log("userindexroute")
+                    Pages.UserIndex.init () url (toNavKey model)
+                        |> updateWith UserIndexModel UserIndexMsg model
                 
                 UserRegisterRoute -> 
-                    Pages.UserRegister.init 3 url (toNavKey model) |> updateWith UserRegisterModel UserRegisterMsg model
+                    Debug.log("userRegisterRoute")
+                    Pages.UserRegister.init 3 url (toNavKey model) 
+                        |> updateWith UserRegisterModel UserRegisterMsg model
                 
                 NotFoundRoute -> 
-                    Pages.NotFound.init () url (toNavKey model) |> updateWith NotFoundModel NotFoundMsg model
+                    Debug.log("notfoundroute")
+                    Pages.NotFound.init () url (toNavKey model) 
+                        |> updateWith NotFoundModel NotFoundMsg model
         
         ( _, _ ) ->
             -- Disregard messages that arrived for the wrong page.
@@ -148,12 +154,6 @@ view model =
 -- ---------------------------
 -- MAIN
 -- ---------------------------
-
-uc url =
-    UrlChanged
-
-ur url = 
-    UrlClicked
 
 
 main : Program Int Model Msg
