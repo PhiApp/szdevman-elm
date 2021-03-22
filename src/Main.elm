@@ -116,8 +116,6 @@ updateWith toModel toMsg model ( subModel, subCmd ) =
     , Cmd.map toMsg subCmd
     )
 
-
-
 -- ---------------------------
 -- VIEW
 -- ---------------------------
