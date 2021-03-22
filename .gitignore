@@ -9,7 +9,6 @@ logs
 *.log
 .idea
 npm-debug.log*
-build/Release
 .npm
 yarn.lock
 .node_repl_histroy
@@ -20,3 +19,6 @@ ignore
 dist
 test/VerifyExamples
 package-lock.json
+
+build/*
+!build/.gitkeep
