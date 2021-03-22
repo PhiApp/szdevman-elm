@@ -104,12 +104,11 @@ add1 model =
 -- VIEW
 -- ---------------------------
 
-
+view: Model -> Html Msg
 view model =
     div [] 
     [
-        div [] [text (Url.toString model.url)]
-        ,  div [ class "pure-menu pure-menu-horizontal" ]
+        div [ class "pure-menu pure-menu-horizontal" ]
             [ a 
                 [ class "pure-menu-heading pure-menu-link"
                 , href "#"

@@ -2,9 +2,14 @@
 module Pages.UserIndex exposing (..)
 
 import Url
-import Url.Parser as Parser
+import Url.Parser 
 import Browser.Navigation as Nav
 import Browser exposing (UrlRequest)
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
+import Http exposing (Error(..))
+
 
 
 -- ---------------------------
@@ -35,6 +40,16 @@ type Msg =
 
 update msg model = 
     (model, Cmd.none)
+
+
+-- ---------------------------
+-- VIEW
+-- ---------------------------
+
+view: Model -> Html msg
+view model = 
+    div [] [text "UserIndex"]
+
 
 toNavKey model =
     model.navKey

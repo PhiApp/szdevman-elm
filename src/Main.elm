@@ -5,11 +5,11 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http exposing (Error(..))
-
 import Url
 import Url.Parser as Parser
 import Browser.Navigation as Nav
 import Browser exposing (UrlRequest)
+
 import Pages.UserIndex
 import Pages.UserRegister
 import Pages.NotFound
@@ -85,12 +85,15 @@ update message model =
         (UserRegisterMsg subMsg, UserRegisterModel subModel) -> 
             Pages.UserRegister.update subMsg subModel
                 |> updateWith UserRegisterModel UserRegisterMsg model
+
         (UserIndexMsg subMsg, UserIndexModel subModel) ->
             Pages.UserIndex.update subMsg subModel
                 |> updateWith UserIndexModel UserIndexMsg model
+
         (NotFoundMsg subMsg, NotFoundModel subModel) ->
             Pages.UserIndex.update subMsg subModel
                 |> updateWith NotFoundModel UserIndexMsg model
+
         (UrlClicked urlRequest, _) -> 
             case urlRequest of 
                 Browser.Internal url ->
@@ -98,17 +101,22 @@ update message model =
 
                 Browser.External href ->
                     ( model, Nav.load href )
+
         (UrlChanged url, _) ->
             case toRoute url of 
-            UserIndexRoute ->
-                Pages.UserIndex.init () url (toNavKey model)|> updateWith UserIndexModel UserIndexMsg model
-            UserRegisterRoute -> 
-                Pages.UserRegister.init 3 url (toNavKey model) |> updateWith UserRegisterModel UserRegisterMsg model
-            NotFoundRoute -> 
-                Pages.NotFound.init () url (toNavKey model) |> updateWith NotFoundModel NotFoundMsg model
+                UserIndexRoute ->
+                    Pages.UserIndex.init () url (toNavKey model)|> updateWith UserIndexModel UserIndexMsg model
+                
+                UserRegisterRoute -> 
+                    Pages.UserRegister.init 3 url (toNavKey model) |> updateWith UserRegisterModel UserRegisterMsg model
+                
+                NotFoundRoute -> 
+                    Pages.NotFound.init () url (toNavKey model) |> updateWith NotFoundModel NotFoundMsg model
+        
         ( _, _ ) ->
             -- Disregard messages that arrived for the wrong page.
             ( model, Cmd.none )
+
 
 updateWith : (subModel -> Model) -> (subMsg -> Msg) -> Model -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg )
 updateWith toModel toMsg model ( subModel, subCmd ) =
@@ -119,11 +127,22 @@ updateWith toModel toMsg model ( subModel, subCmd ) =
 -- ---------------------------
 -- VIEW
 -- ---------------------------
-
+viewPage page toMsg =
+    Html.map toMsg page
 
 view : Model -> Html Msg
 view model =
-    div [] [text "test"]
+    case model of 
+        UserRegisterModel subModel ->
+            viewPage (Pages.UserRegister.view subModel) UserRegisterMsg
+
+        NotFoundModel subModel ->
+            viewPage (Pages.NotFound.view subModel) NotFoundMsg
+
+
+        UserIndexModel subModel ->
+            viewPage (Pages.UserIndex.view subModel) UserIndexMsg
+
 
 
 -- ---------------------------
