@@ -1,21 +1,52 @@
-port module Main exposing (Model, Msg(..), add1, init, main, toJs, update, view)
+module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http exposing (Error(..))
-import Json.Decode as Decode
-import Html.Attributes
+
+import Url
+import Url.Parser as Parser
+import Browser.Navigation as Nav
+import Browser exposing (UrlRequest)
+import Pages.UserIndex
+import Pages.UserRegister
+import Pages.NotFound
+
+
 
 
 
 -- ---------------------------
--- PORTS
+-- ROUTES
 -- ---------------------------
 
 
-port toJs : String -> Cmd msg
+type Route
+  = UserIndexRoute
+  | UserRegisterRoute
+  | NotFoundRoute
+
+
+routeParser : Parser.Parser (Route -> a) a
+routeParser =
+  Parser.oneOf
+    [ Parser.map UserIndexRoute  (Parser.s "user" )
+    , Parser.map UserRegisterRoute Parser.top
+    ]
+
+toRoute : Url.Url -> Route
+toRoute url =
+   Maybe.withDefault NotFoundRoute (Parser.parse routeParser url)
+
+
+toNavKey: Model -> Nav.Key
+toNavKey model = 
+    case model of 
+        UserRegisterModel userRegisterModel -> Pages.UserRegister.toNavKey userRegisterModel
+        UserIndexModel userIndexModel -> Pages.UserIndex.toNavKey userIndexModel
+        NotFoundModel notFoundModel -> Pages.NotFound.toNavKey notFoundModel
 
 
 
@@ -24,16 +55,15 @@ port toJs : String -> Cmd msg
 -- ---------------------------
 
 
-type alias Model =
-    { counter : Int
-    , serverMessage : String
-    }
+type Model = 
+    UserRegisterModel Pages.UserRegister.Model
+    | NotFoundModel Pages.NotFound.Model
+    | UserIndexModel Pages.UserIndex.Model
 
 
-init : Int -> ( Model, Cmd Msg )
-init flags =
-    ( { counter = flags, serverMessage = "" }, Cmd.none )
-
+init flags url key =
+    Pages.UserRegister.init flags url key 
+        |> updateWith UserRegisterModel UserRegisterMsg (UserRegisterModel {navKey= key, counter = flags, serverMessage = "" })
 
 
 -- ---------------------------
@@ -42,62 +72,49 @@ init flags =
 
 
 type Msg
-    = Inc
-    | TestServer
-    | OnServerResponse (Result Http.Error String)
+    = UrlClicked UrlRequest
+    | UrlChanged Url.Url
+    | UserRegisterMsg Pages.UserRegister.Msg
+    | UserIndexMsg Pages.UserIndex.Msg
+    | NotFoundMsg Pages.NotFound.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
-    case message of
-        Inc ->
-            ( add1 model, toJs "Inc" )
+    case (message, model) of
+        (UserRegisterMsg subMsg, UserRegisterModel subModel) -> 
+            Pages.UserRegister.update subMsg subModel
+                |> updateWith UserRegisterModel UserRegisterMsg model
+        (UserIndexMsg subMsg, UserIndexModel subModel) ->
+            Pages.UserIndex.update subMsg subModel
+                |> updateWith UserIndexModel UserIndexMsg model
+        (NotFoundMsg subMsg, NotFoundModel subModel) ->
+            Pages.UserIndex.update subMsg subModel
+                |> updateWith NotFoundModel UserIndexMsg model
+        (UrlClicked urlRequest, _) -> 
+            case urlRequest of 
+                Browser.Internal url ->
+                    ( model, Nav.pushUrl (toNavKey model) (Url.toString url) )
 
-        TestServer ->
-            let
-                expect =
-                    Http.expectJson OnServerResponse (Decode.field "result" Decode.string)
-            in
-            ( model
-            , Http.get { url = "/test", expect = expect }
-            )
+                Browser.External href ->
+                    ( model, Nav.load href )
+        (UrlChanged url, _) ->
+            case toRoute url of 
+            UserIndexRoute ->
+                Pages.UserIndex.init () url (toNavKey model)|> updateWith UserIndexModel UserIndexMsg model
+            UserRegisterRoute -> 
+                Pages.UserRegister.init 3 url (toNavKey model) |> updateWith UserRegisterModel UserRegisterMsg model
+            NotFoundRoute -> 
+                Pages.NotFound.init () url (toNavKey model) |> updateWith NotFoundModel NotFoundMsg model
+        ( _, _ ) ->
+            -- Disregard messages that arrived for the wrong page.
+            ( model, Cmd.none )
 
-        OnServerResponse res ->
-            case res of
-                Ok r ->
-                    ( { model | serverMessage = r }, Cmd.none )
-
-                Err err ->
-                    ( { model | serverMessage = "Error: " ++ httpErrorToString err }, Cmd.none )
-
-
-httpErrorToString : Http.Error -> String
-httpErrorToString err =
-    case err of
-        BadUrl url ->
-            "BadUrl: " ++ url
-
-        Timeout ->
-            "Timeout"
-
-        NetworkError ->
-            "NetworkError"
-
-        BadStatus _ ->
-            "BadStatus"
-
-        BadBody s ->
-            "BadBody: " ++ s
-
-
-{-| increments the counter
-
-    add1 5 --> 6
-
--}
-add1 : Model -> Model
-add1 model =
-    { model | counter = model.counter + 1 }
+updateWith : (subModel -> Model) -> (subMsg -> Msg) -> Model -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg )
+updateWith toModel toMsg model ( subModel, subCmd ) =
+    ( toModel subModel
+    , Cmd.map toMsg subCmd
+    )
 
 
 
@@ -108,91 +125,23 @@ add1 model =
 
 view : Model -> Html Msg
 view model =
-    div [] 
-    [
-        div [ class "pure-menu pure-menu-horizontal" ]
-            [ a 
-                [ class "pure-menu-heading pure-menu-link"
-                , href "#"
-                ]
-                [ text "SzDevMan" ]
-            , ul [ class "pure-menu-list" ] 
-            [ li [ class "pure-menu-list" ]
-                [ a 
-                    [ class "pure-menu-link"
-                    , href "#"
-                    ]
-                    [ text "Register" 
-                    ]
-                ]
-                , li [ class "pure-menu-list" ]
-                [ a 
-                    [ class "pure-menu-link"
-                    , href "#"
-                    ]
-                    [ text "UserList" 
-                    ]
-                ]
-            ]
-        ]
-        ,  div [ class "container" ]
-        [ header [ class "pure-g" ]
-            [ h1 [ class "pure-u-4-5" ] [ text "Elm 0.19.1 Webpack Starter, with hot-reloading" ]
-            ]
-        , p [] [ text "Click on the button below to increment the state." ]
-        , div [ class "pure-g" ]
-            [ div [ class "pure-u-1-3" ]
-                [ button
-                    [ class "pure-button pure-button-primary"
-                    , onClick Inc
-                    ]
-                    [ text "+ 1" ]
-                , text <| String.fromInt model.counter
-                ]
-            , div [ class "pure-u-1-3" ] []
-            , div [ class "pure-u-1-3" ]
-                [ button
-                    [ class "pure-button pure-button-primary"
-                    , onClick TestServer
-                    ]
-                    [ text "ping dev server" ]
-                , text model.serverMessage
-                ]
-            ]
-        , p [] [ text "Then make a change to the source code and see how the state is retained after recompilation." ]
-        , p []
-            [ text "And now don't forget to add a star to the Github repo "
-            , a [ href "https://github.com/simonh1000/elm-webpack-starter" ] [ text "elm-webpack-starter" ]
-            ]
-        , Html.form [ class "pure-form pure-form-stacked"] 
-        [ fieldset [] 
-            [ legend [] [ text "Bitte gebe deine Benutzerdaten ein:" ]
-            , label [ for "stacked-email" ] [ text "Email" ]
-            , input [ Html.Attributes.type_ "email"
-                , id "stacked-email"
-                , placeholder "Email"
-                ] []
-            , span [class "pure-form-message"] [ text "This is a required field." ]
-            , label [ for "stacked-password" ] [ text "Password" ]
-            , input [ Html.Attributes.type_ "password"
-                , id "stacked-password"
-                , placeholder "Password" ] []
-            ]
-            , button [ Html.Attributes.type_ "submit"
-                , class "pure-button pure-button-primary" ] [ text "Sign in"]
-            ] 
-        ]
-    ]
+    div [] [text "test"]
 
 
 -- ---------------------------
 -- MAIN
 -- ---------------------------
 
+uc url =
+    UrlChanged
+
+ur url = 
+    UrlClicked
+
 
 main : Program Int Model Msg
 main =
-    Browser.document
+    Browser.application
         { init = init
         , update = update
         , view =
@@ -201,4 +150,6 @@ main =
                 , body = [ view m ]
                 }
         , subscriptions = \_ -> Sub.none
+        , onUrlRequest = UrlClicked 
+        , onUrlChange = UrlChanged 
         }
