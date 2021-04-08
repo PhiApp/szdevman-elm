@@ -1,5 +1,5 @@
 
-module Pages.UserIndex exposing (..)
+module Pages.UserList exposing (..)
 
 import Url
 import Url.Parser 
@@ -23,7 +23,7 @@ type alias Model =
     }
 
 
-init flags url key =
+init key =
     ( {navKey=key, users=["o", "p"] }, Cmd.none )
 
 
@@ -48,7 +48,7 @@ update msg model =
 
 view: Model -> Html msg
 view model = 
-    div [] [text "UserIndex"]
+    div [] [text "UserList"]
 
 
 toNavKey model =

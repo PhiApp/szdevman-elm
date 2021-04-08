@@ -12,12 +12,10 @@ import Http exposing (Error(..))
 
 
 
-type alias Model = 
-    { navKey: Nav.Key
-    }
+type alias Model = Nav.Key
 
-init flags url key =
-    ( { navKey=key }, Cmd.none )
+init key =
+    ( key, Cmd.none )
 
 
 
@@ -38,7 +36,7 @@ type Msg =
 
 view: Model -> Html msg
 view model = 
-    div [] [text "UserIndex"]
+    div [] [text "404 - Page Not Fount"]
     
 
 
@@ -48,5 +46,6 @@ view model =
 -- ---------------------------
 
 
+toNavKey : Model -> Model
 toNavKey model =
-    model.navKey
+    model

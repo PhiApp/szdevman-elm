@@ -24,8 +24,8 @@ port toJs : String -> Cmd msg
 -- ---------------------------
 
 
-init : Int -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
-init flags url key =
+init : Int -> Nav.Key -> ( Model, Cmd Msg )
+init flags key =
     ( {navKey= key, counter = flags, serverMessage = "" }, Cmd.none )
 
 
@@ -107,36 +107,7 @@ add1 model =
 view: Model -> Html Msg
 view model =
     div [] 
-    [     div [] [ a [href "/affe"] [text "affe"] ]
-        , div [] [ a [href "/user"] [text "user"] ]
-        , div [] [ a [href "/"] [text "/"] ]
-
-        , div [ class "pure-menu pure-menu-horizontal" ]
-            [ a 
-                [ class "pure-menu-heading pure-menu-link"
-                , href "#"
-                ]
-                [ text "SzDevMan" ]
-            , ul [ class "pure-menu-list" ] 
-            [ li [ class "pure-menu-list" ]
-                [ a 
-                    [ class "pure-menu-link"
-                    , href "#"
-                    ]
-                    [ text "Register" 
-                    ]
-                ]
-                , li [ class "pure-menu-list" ]
-                [ a 
-                    [ class "pure-menu-link"
-                    , href "#"
-                    ]
-                    [ text "UserList" 
-                    ]
-                ]
-            ]
-        ]
-        ,  div [ class "container" ]
+    [   div [ class "container" ]
         [ header [ class "pure-g" ]
             [ h1 [ class "pure-u-4-5" ] [ text "Elm 0.19.1 Webpack Starter, with hot-reloading" ]
             ]

@@ -10,9 +10,11 @@ import Url.Parser as Parser
 import Browser.Navigation as Nav
 import Browser exposing (UrlRequest)
 
-import Pages.UserIndex
+import Pages.UserList
 import Pages.UserRegister
 import Pages.NotFound
+import Browser exposing (Document)
+import Browser.Navigation exposing (Key)
 
 
 
@@ -24,7 +26,7 @@ import Pages.NotFound
 
 
 type Route
-  = UserIndexRoute
+  = UserListRoute
   | UserRegisterRoute
   | NotFoundRoute
 
@@ -32,8 +34,8 @@ type Route
 routeParser : Parser.Parser (Route -> a) a
 routeParser =
   Parser.oneOf
-    [ Parser.map UserIndexRoute  (Parser.s "user" )
-    , Parser.map UserRegisterRoute Parser.top
+    [ Parser.map UserListRoute  (Parser.s "user_list" )
+    , Parser.map UserRegisterRoute (Parser.top)
     ]
 
 toRoute : Url.Url -> Route
@@ -45,7 +47,7 @@ toNavKey: Model -> Nav.Key
 toNavKey model = 
     case model of 
         UserRegisterModel userRegisterModel -> Pages.UserRegister.toNavKey userRegisterModel
-        UserIndexModel userIndexModel -> Pages.UserIndex.toNavKey userIndexModel
+        UserListModel userListModel -> Pages.UserList.toNavKey userListModel
         NotFoundModel notFoundModel -> Pages.NotFound.toNavKey notFoundModel
 
 
@@ -58,12 +60,14 @@ toNavKey model =
 type Model = 
     UserRegisterModel Pages.UserRegister.Model
     | NotFoundModel Pages.NotFound.Model
-    | UserIndexModel Pages.UserIndex.Model
+    | UserListModel Pages.UserList.Model
 
 
+init : Int -> Url.Url -> Key -> (Model, Cmd Msg)
 init flags url key =
-    Pages.UserRegister.init flags url key 
-        |> updateWith UserRegisterModel UserRegisterMsg (UserRegisterModel {navKey= key, counter = flags, serverMessage = "" })
+    let (submodel,cmd) = Pages.NotFound.init key
+    in update (UrlChanged url) (NotFoundModel submodel)  
+    
 
 
 -- ---------------------------
@@ -75,7 +79,7 @@ type Msg
     = UrlClicked UrlRequest
     | UrlChanged Url.Url
     | UserRegisterMsg Pages.UserRegister.Msg
-    | UserIndexMsg Pages.UserIndex.Msg
+    | UserListMsg Pages.UserList.Msg
     | NotFoundMsg Pages.NotFound.Msg
 
 
@@ -86,13 +90,13 @@ update message model =
             Pages.UserRegister.update subMsg subModel
                 |> updateWith UserRegisterModel UserRegisterMsg model
 
-        (UserIndexMsg subMsg, UserIndexModel subModel) ->
-            Pages.UserIndex.update subMsg subModel
-                |> updateWith UserIndexModel UserIndexMsg model
+        (UserListMsg subMsg, UserListModel subModel) ->
+            Pages.UserList.update subMsg subModel
+                |> updateWith UserListModel UserListMsg model
 
         (NotFoundMsg subMsg, NotFoundModel subModel) ->
-            Pages.UserIndex.update subMsg subModel
-                |> updateWith NotFoundModel UserIndexMsg model
+            Pages.UserList.update subMsg subModel
+                |> updateWith NotFoundModel UserListMsg model
 
         (UrlClicked urlRequest, _) -> 
             case urlRequest of 
@@ -104,19 +108,19 @@ update message model =
 
         (UrlChanged url, _) ->
             case toRoute url of 
-                UserIndexRoute ->
-                    Debug.log("userindexroute")
-                    Pages.UserIndex.init () url (toNavKey model)
-                        |> updateWith UserIndexModel UserIndexMsg model
+                UserListRoute ->
+                    Debug.log("userlistroute")
+                    Pages.UserList.init (toNavKey model)
+                        |> updateWith UserListModel UserListMsg model
                 
                 UserRegisterRoute -> 
                     Debug.log("userRegisterRoute")
-                    Pages.UserRegister.init 3 url (toNavKey model) 
+                    Pages.UserRegister.init 3 (toNavKey model) 
                         |> updateWith UserRegisterModel UserRegisterMsg model
                 
                 NotFoundRoute -> 
                     Debug.log("notfoundroute")
-                    Pages.NotFound.init () url (toNavKey model) 
+                    Pages.NotFound.init (toNavKey model) 
                         |> updateWith NotFoundModel NotFoundMsg model
         
         ( _, _ ) ->
@@ -133,39 +137,76 @@ updateWith toModel toMsg model ( subModel, subCmd ) =
 -- ---------------------------
 -- VIEW
 -- ---------------------------
-viewPage page toMsg =
-    Html.map toMsg page
 
-view : Model -> Html Msg
-view model =
+
+view model = 
+    { title = render_title model
+    , body = view_html model }
+
+render_title model = 
     case model of 
+        UserRegisterModel _ -> "szdevman :: Register User"
+        UserListModel _ -> "szdevman :: List User"
+        NotFoundModel _ -> "Not Found"
+
+
+view_html model = 
+    [ insert_navbar model
+    , case model of 
         UserRegisterModel subModel ->
             viewPage (Pages.UserRegister.view subModel) UserRegisterMsg
 
         NotFoundModel subModel ->
             viewPage (Pages.NotFound.view subModel) NotFoundMsg
+            
+        UserListModel subModel ->
+            viewPage (Pages.UserList.view subModel) UserListMsg
+    ]
 
 
-        UserIndexModel subModel ->
-            viewPage (Pages.UserIndex.view subModel) UserIndexMsg
+viewPage : Html a -> (a -> msg) -> Html msg
+viewPage page toMsg =
+    Html.map toMsg page
 
+insert_navbar : Model -> Html msg
+insert_navbar model = 
+    div [ class "pure-menu pure-menu-horizontal" ]
+            [ -- a 
+                -- [ class "pure-menu-heading pure-menu-link"
+                -- , href "#"
+                -- ]
+                -- [ text "SzDevMan" ],
+             ul [ class "pure-menu-list" ] 
+            [ li [ class "pure-menu-list" ]
+                [ a 
+                    [ class "pure-menu-link"
+                    , href "/"
+                    ]
+                    [ text "Register" 
+                    ]
+                ]
+                , li [ class "pure-menu-list" ]
+                [ a 
+                    [ class "pure-menu-link"
+                    , href "user_list"
+                    ]
+                    [ text "UserList" 
+                    ]
+                ]
+            ]
+        ]
 
 
 -- ---------------------------
 -- MAIN
 -- ---------------------------
 
-
 main : Program Int Model Msg
 main =
     Browser.application
         { init = init
         , update = update
-        , view =
-            \m ->
-                { title = "szdevman :: register"
-                , body = [ view m ]
-                }
+        , view = view
         , subscriptions = \_ -> Sub.none
         , onUrlRequest = UrlClicked 
         , onUrlChange = UrlChanged 
