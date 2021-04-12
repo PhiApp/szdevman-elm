@@ -21,3 +21,21 @@ header {
 button {
     margin-right: 15px;
 }
+
+.notification {
+    width: 100%;
+    font-weight: 400;
+    background-color: lightgray;
+    padding: 5px;
+    border-radius: 2px;
+    display: none;
+
+    &.success {
+        color: #50b150;
+        display: block;
+    }
+    &.error {
+        color: #a50e0e;
+        display: block;
+    }
+}
