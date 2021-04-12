@@ -95,8 +95,7 @@ update message model =
                 |> updateWith UserListModel UserListMsg model
 
         (NotFoundMsg subMsg, NotFoundModel subModel) ->
-            Pages.UserList.update subMsg subModel
-                |> updateWith NotFoundModel UserListMsg model
+            (NotFoundModel subModel, Cmd.none)
 
         (UrlClicked urlRequest, _) -> 
             case urlRequest of 
