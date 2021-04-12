@@ -111,7 +111,7 @@ update msg model =
 view: Model -> Html Msg
 view model = 
     div [class "container"] 
-        [ h1 [] [text "UserList"]
+        [ h1 [] [text "User List"]
         , case model.users of 
             Users users ->
                 renderUserTable users
