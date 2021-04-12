@@ -1,0 +1,10 @@
+Dockerfile
+build/
+test/
+node_modules/
+elm-stuff/
+.gitignore
+.dockerignore
+README.md
+test.http
+elm

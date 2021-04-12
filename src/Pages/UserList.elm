@@ -3,7 +3,7 @@ module Pages.UserList exposing (..)
 
 import Browser.Navigation as Nav
 import Browser exposing (UrlRequest)
-import Html exposing (tr, Html, text, table, th, td, div, h1, p)
+import Html exposing (tr, Html, text, table, th, td, thead, tbody, div, h1, p)
 import Html.Attributes exposing (..)
 import Http exposing (Error(..))
 import Json.Decode as Decode
@@ -110,8 +110,8 @@ update msg model =
 
 view: Model -> Html Msg
 view model = 
-    div [] 
-        [ h1 [] [text "UserList"]
+    div [class "container"] 
+        [ h1 [] [text "User List"]
         , case model.users of 
             Users users ->
                 renderUserTable users
@@ -124,13 +124,16 @@ view model =
 
 renderUserTable: List User -> Html Msg
 renderUserTable userList =
-    table [] 
-     ((tr []
-        [ th [] [text "Name"]
-        , th [] [text "Email"]
-        , th [] [text "Password"]
-        ]):: List.map renderUserRow userList)
-    
+    table [class "pure-table"]
+        [ thead [] 
+            [ tr []
+                [ th [] [text "Name"]
+                , th [] [text "Email"]
+                , th [] [text "Password"]
+                ]
+            ] 
+        , tbody [] (List.map renderUserRow userList)
+        ]
 
 renderUserRow : User -> Html Msg
 renderUserRow user = 
