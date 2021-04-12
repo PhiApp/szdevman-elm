@@ -3,10 +3,11 @@ port module Pages.UserRegister exposing (..)
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onInput)
 import Http exposing (..)
-import Json.Decode as Decode 
 import Json.Encode as Encode
+
+
 
 -- ---------------------------
 -- PORTS
@@ -24,12 +25,11 @@ port toJs : String -> Cmd msg
 
 init : Int -> Nav.Key -> ( Model, Cmd Msg )
 init flags key =
-    ( { navKey = key, counter = flags, serverMessage = "", httpError = None, email = "", password = "", name = "" }, Cmd.none )
+    ( { navKey = key, serverMessage = "", httpError = None, email = "", password = "", name = "" }, Cmd.none )
 
 
 type alias Model =
     { navKey : Nav.Key
-    , counter : Int
     , serverMessage : String
     , name : String
     , email : String
@@ -37,15 +37,23 @@ type alias Model =
     , httpError : HttpNotification
     }
 
+
+
 -- ---------------------------
 -- UPDATE
 -- ---------------------------
 
 
+type InputType
+    = Name
+    | Email
+    | Password
+
+
 type Msg
-    = Inc
-    | TestServer
+    = TestServer
     | OnServerResponse (Result Http.Error String)
+    | UpdateInput InputType String
 
 
 type HttpNotification
@@ -58,7 +66,7 @@ postUser user =
     Http.post
         { url = "/api/users/"
         , body = Http.jsonBody (userEncode user)
-        , expect = Http.expectJson OnServerResponse (Decode.field "result" Decode.string)
+        , expect = Http.expectString OnServerResponse
         }
 
 
@@ -70,21 +78,36 @@ userEncode user =
         ]
 
 
+resetInput : Model -> Model
+resetInput model =
+    { model | name = "", password = "", email = "" }
+
+
 update message model =
     case message of
-        Inc ->
-            ( add1 model, toJs "Inc" )
-
         TestServer ->
-            ( model, postUser { name = "awd", email = "awd", password = "" } )
+            ( model, postUser { name = model.password, email = model.email, password = model.password } )
 
         OnServerResponse res ->
             case res of
-                Ok r ->
+                Ok _ ->
                     ( { model | httpError = Success, serverMessage = "User created!" }, Cmd.none )
 
                 Err err ->
                     ( { model | serverMessage = "Error: " ++ httpErrorToString err, httpError = Error }, Cmd.none )
+
+        UpdateInput inputType inputValue ->
+            ( case inputType of
+                Name ->
+                    { model | name = inputValue }
+
+                Email ->
+                    { model | email = inputValue }
+
+                Password ->
+                    { model | password = inputValue }
+            , Cmd.none
+            )
 
 
 httpErrorToString : Http.Error -> String
@@ -104,11 +127,6 @@ httpErrorToString err =
 
         BadBody s ->
             "BadBody: " ++ s
-
-
-add1 : Model -> Model
-add1 model =
-    { model | counter = model.counter + 1 }
 
 
 
@@ -143,6 +161,8 @@ view model =
                         , id "stacked-name"
                         , placeholder "Name"
                         , name "Name"
+                        , value model.name
+                        , onInput (UpdateInput Name)
                         ]
                         []
                     , label [ for "stacked-email" ] [ text "Email" ]
@@ -151,6 +171,8 @@ view model =
                         , id "stacked-email"
                         , placeholder "Email"
                         , name "Email"
+                        , value model.email
+                        , onInput (UpdateInput Email)
                         ]
                         []
                     , span [ class "pure-form-message" ] [ text "This is a required field." ]
@@ -160,6 +182,8 @@ view model =
                         , id "stacked-password"
                         , placeholder "Password"
                         , name "Password"
+                        , value model.password
+                        , onInput (UpdateInput Password)
                         ]
                         []
                     ]
