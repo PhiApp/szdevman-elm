@@ -1,0 +1,11 @@
+GET http://10.0.0.21:8444/users/
+
+###
+POST http://10.0.0.21:8444/users/
+Content-Type: application/json
+
+{
+  "Name" :  "test_user",
+  "Email":  "test_user@gmail.com",
+  "Password":  "zu"
+}

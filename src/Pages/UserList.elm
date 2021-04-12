@@ -10,6 +10,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http exposing (Error(..))
 import Json.Decode as Decode
+import Json.Encode as Encode
 
 -- ---------------------------
 -- MODEL
@@ -42,9 +43,24 @@ init key =
 getUsers : Cmd Msg
 getUsers =
   Http.get
-    { url = "/api/users"
+    { url = "/api/users/"
     , expect = Http.expectJson GotUsers userDecoder
     }
+
+-- postUser user = 
+--     Http.post
+--         { url = "/api/users"
+--         , body = Http.jsonBody (userEncode user)
+--         , expect = Http.expectJson GotUsers userDecoder
+--         }
+
+-- userEncode user =
+--     Encode.object 
+--         [ ("Name", Encode.string user.name)
+--         , ("Email", Encode.string user.email)
+--         , ("Password", Encode.string user.password)
+--         ]
+    
 
 userDecoder: Decode.Decoder (List User)
 userDecoder =

@@ -108,17 +108,14 @@ update message model =
         (UrlChanged url, _) ->
             case toRoute url of 
                 UserListRoute ->
-                    Debug.log("userlistroute")
                     Pages.UserList.init (toNavKey model)
                         |> updateWith UserListModel UserListMsg model
                 
                 UserRegisterRoute -> 
-                    Debug.log("userRegisterRoute")
                     Pages.UserRegister.init 3 (toNavKey model) 
                         |> updateWith UserRegisterModel UserRegisterMsg model
                 
                 NotFoundRoute -> 
-                    Debug.log("notfoundroute")
                     Pages.NotFound.init (toNavKey model) 
                         |> updateWith NotFoundModel NotFoundMsg model
         
