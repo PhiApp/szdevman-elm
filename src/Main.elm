@@ -141,8 +141,8 @@ view model =
 
 render_title model = 
     case model of 
-        UserRegisterModel _ -> "szdevman :: Register User"
-        UserListModel _ -> "szdevman :: List User"
+        UserRegisterModel _ -> "szdevman :: User Register"
+        UserListModel _ -> "szdevman :: User List"
         NotFoundModel _ -> "Not Found"
 
 
