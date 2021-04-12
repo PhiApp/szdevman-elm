@@ -1,16 +1,12 @@
 
 module Pages.UserList exposing (..)
 
-import Url
-import Url.Parser 
 import Browser.Navigation as Nav
 import Browser exposing (UrlRequest)
 import Html exposing (tr, Html, text, table, th, td, div, h1, p)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
 import Http exposing (Error(..))
 import Json.Decode as Decode
-import Json.Encode as Encode
 
 -- ---------------------------
 -- MODEL

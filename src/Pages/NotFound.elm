@@ -1,12 +1,8 @@
 module Pages.NotFound exposing (..)
 
-import Url
-import Url.Parser 
 import Browser.Navigation as Nav
-import Browser exposing (UrlRequest)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
 import Http exposing (Error(..))
 
 
@@ -32,7 +28,7 @@ type Msg =
 -- ---------------------------
 
 view: Model -> Html msg
-view model = 
+view _ = 
     div [] [text "404 - Page Not Fount"]
     
 

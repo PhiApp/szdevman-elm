@@ -1,18 +1,12 @@
 port module Pages.UserRegister exposing (..)
 
-import Browser exposing (UrlRequest)
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http exposing (..)
-import Json.Decode as Decode exposing (null)
+import Json.Decode as Decode 
 import Json.Encode as Encode
-import Url
-import Url.Parser as Parser
-import Debug exposing (toString)
-
-
 
 -- ---------------------------
 -- PORTS
@@ -106,7 +100,7 @@ httpErrorToString err =
             "NetworkError"
 
         BadStatus status ->
-            "BadStatus: " ++ toString status
+            "BadStatus: " ++ String.fromInt status
 
         BadBody s ->
             "BadBody: " ++ s
