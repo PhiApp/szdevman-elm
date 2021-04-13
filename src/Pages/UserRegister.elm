@@ -24,7 +24,7 @@ port toJs : String -> Cmd msg
 
 
 init : Int -> Nav.Key -> ( Model, Cmd Msg )
-init flags key =
+init _ key =
     ( { navKey = key, serverMessage = "", httpError = None, email = "", password = "", name = "" }, Cmd.none )
 
 
@@ -86,7 +86,7 @@ resetInput model =
 update message model =
     case message of
         TestServer ->
-            ( model, postUser { name = model.password, email = model.email, password = model.password } )
+            ( model, postUser { name = model.name, email = model.email, password = model.password } )
 
         OnServerResponse res ->
             case res of
@@ -163,6 +163,8 @@ view model =
                         , name "Name"
                         , value model.name
                         , onInput (UpdateInput Name)
+                        , maxlength 20
+                        , required True
                         ]
                         []
                     , label [ for "stacked-email" ] [ text "Email" ]
@@ -173,9 +175,10 @@ view model =
                         , name "Email"
                         , value model.email
                         , onInput (UpdateInput Email)
+                        , maxlength 40
+                        , required True
                         ]
                         []
-                    , span [ class "pure-form-message" ] [ text "This is a required field." ]
                     , label [ for "stacked-password" ] [ text "Password" ]
                     , input
                         [ Html.Attributes.type_ "password"
@@ -184,6 +187,8 @@ view model =
                         , name "Password"
                         , value model.password
                         , onInput (UpdateInput Password)
+                        , maxlength 40
+                        , required True
                         ]
                         []
                     ]
