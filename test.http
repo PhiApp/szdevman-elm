@@ -1,7 +1,7 @@
-GET http://10.0.0.21:8444/users/
+GET http://localhost:8444/users/
 
 ###
-POST http://10.0.0.21:8444/users/
+POST http://localhost:8444/users/
 Content-Type: application/json
 
 {
