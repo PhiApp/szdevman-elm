@@ -1,8 +1,9 @@
 FROM nginx:1.19.8
 
-COPY nginx.conf /etc/nginx/nginx.conf
-
 RUN apt update && apt install npm -y 
+
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
+COPY nginx/default.conf.template /etc/nginx/templates/
 
 WORKDIR /code
 
